@@ -3,6 +3,8 @@ use std::fs::{self, File};
 use std::io::{self, Write};
 use std::process::Command;
 use std::time::{Duration, Instant};
+
+mod plugins;
 use reqwest::{Client, StatusCode};
 use colored::*;
 
@@ -2310,6 +2312,32 @@ fn print_list_checks(fr: bool) {
 }
 
 // =============================================================================
+// =============================================================================
+// MODULE 3 : MOTEUR D'EXÉCUTION DYNAMIQUE DE PLUGINS & TESTS SYSTÈME
+// =============================================================================
+
+async fn executer_plugins_engine(dir_arg: Option<&str>, fr: bool) {
+    let plugins_dir = dir_arg.unwrap_or("plugins");
+    let (plugin_tests, load_errors) = plugins::load_plugins_from_directory(plugins_dir);
+    let mut results = Vec::new();
+
+    let client = match create_http_client() {
+        Ok(c) => c,
+        Err(_) => Client::new(),
+    };
+
+    for test in &plugin_tests {
+        let res = match test.category.as_str() {
+            "http_status" => plugins::execute_http_test(&client, test, fr).await,
+            _ => plugins::execute_io_test(test, fr),
+        };
+        results.push(res);
+    }
+
+    plugins::print_plugin_results_table(&results, &load_errors, fr);
+}
+
+// =============================================================================
 // FONCTION PRINCIPALE main()
 // =============================================================================
 #[tokio::main]
@@ -2324,6 +2352,17 @@ async fn main() {
         .iter()
         .filter(|arg| *arg != "-fr" && *arg != "--fr")
         .collect();
+
+    // 0. Moteur de Plugins & Tests E/S Dynamiques : Hunter --plugins [DOSSIER] [-fr]
+    if clean_args.len() >= 2 && (clean_args[1] == "--plugins" || clean_args[1] == "-p" || clean_args[1] == "--test" || clean_args[1] == "-t") {
+        let custom_dir = if clean_args.len() >= 3 && !clean_args[2].starts_with('-') {
+            Some(clean_args[2].as_str())
+        } else {
+            None
+        };
+        executer_plugins_engine(custom_dir, is_french).await;
+        return;
+    }
 
     // 1. Commande Aide Auto-Defend : Hunter --auto-defend help [-fr] (ou -h, --help)
     if clean_args.len() >= 2 && clean_args[1] == "--auto-defend" {
@@ -2359,31 +2398,37 @@ async fn main() {
 
     // Affichage de l'aide générale si les arguments sont incorrects
     if is_french {
-        println!("HUNTER — Outil Universel d'Audit Web & Défense Système");
+        println!("HUNTER — Outil Universel de Tests Système & Audit de Conformité");
         println!("\nCommandes disponibles :");
-        println!("  1. Audit Web OWASP Top 10 :");
+        println!("  1. Moteur de Plugins Dynamiques & Tests I/O (Data-Driven Tests) :");
+        println!("     Hunter --plugins [DOSSIER_PLUGINS] [-fr]");
+        println!("     Exemple : Hunter --plugins plugins/ -fr");
+        println!("\n  2. Audit Web OWASP Top 10 :");
         println!("     Hunter -owasp <URL_CIBLE> [-fr]");
-        println!("     Exemple : Hunter -owasp http://localhost:3000 -fr");
-        println!("\n  2. Évaluation de Sécurité & Remédiation Système (Auto-Defend) :");
+        println!("     Exemple : Hunter -owasp https://anti-retour-saas.onrender.com/ -fr");
+        println!("\n  3. Évaluation de Sécurité & Remédiation Système (Auto-Defend) :");
         println!("     Hunter --auto-defend <CIBLE> -check <NOM_SCENARIO> [-fr]");
         println!("     Exemples :");
         println!("       Hunter --auto-defend localhost -check eicar_quarantine -fr");
         println!("       Hunter --auto-defend localhost -check all -fr");
-        println!("\n  3. Catalogue d'Aide Complet Auto-Defend :");
+        println!("\n  4. Catalogue d'Aide Complet Auto-Defend :");
         println!("     Hunter --auto-defend help [-fr]");
         println!("     Hunter --list-checks [-fr]");
     } else {
-        println!("HUNTER — Universal Web Audit & System Defense Suite");
+        println!("HUNTER — Universal System Testing & Compliance Audit Suite");
         println!("\nAvailable Commands:");
-        println!("  1. OWASP Top 10 Web Audit:");
+        println!("  1. Dynamic Plugins & System I/O Testing Engine (Data-Driven Tests):");
+        println!("     Hunter --plugins [PLUGINS_DIR] [-fr]");
+        println!("     Example: Hunter --plugins plugins/ -fr");
+        println!("\n  2. OWASP Top 10 Web Audit:");
         println!("     Hunter -owasp <TARGET_URL> [-fr]");
-        println!("     Example: Hunter -owasp http://localhost:3000");
-        println!("\n  2. System Posture Evaluation & Auto-Defend Playbooks:");
+        println!("     Example: Hunter -owasp https://anti-retour-saas.onrender.com/");
+        println!("\n  3. System Posture Evaluation & Auto-Defend Playbooks:");
         println!("     Hunter --auto-defend <TARGET> -check <SCENARIO_NAME> [-fr]");
         println!("     Examples:");
         println!("       Hunter --auto-defend localhost -check eicar_quarantine");
         println!("       Hunter --auto-defend localhost -check all");
-        println!("\n  3. Complete Auto-Defend Catalog & Help Screen:");
+        println!("\n  4. Complete Auto-Defend Catalog & Help Screen:");
         println!("     Hunter --auto-defend help [-fr]");
         println!("     Hunter --list-checks [-fr]");
     }

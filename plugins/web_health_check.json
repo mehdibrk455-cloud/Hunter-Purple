@@ -1,0 +1,9 @@
+{
+  "id": "WEB-01",
+  "test_name": "Vérification Endpoint Santé SaaS",
+  "description": "Contrôle la réponse HTTP 200 sur le point de terminaison de base",
+  "category": "http_status",
+  "target_url": "https://anti-retour-saas.onrender.com/",
+  "expected_status_code": 200,
+  "remediation_command": "curl -I https://anti-retour-saas.onrender.com/"
+}

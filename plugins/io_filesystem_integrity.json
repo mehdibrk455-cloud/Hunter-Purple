@@ -1,0 +1,9 @@
+{
+  "id": "IO-01",
+  "test_name": "Diagnostic Intégrité I/O Système de Fichiers",
+  "description": "Vérifie l'écriture, Path::exists et la lecture nominale sur le stockage",
+  "category": "io_file",
+  "test_path": "/tmp/hunter_io_integrity_test.tmp",
+  "test_payload": "HUNTER_DIAGNOSTIC_PAYLOAD_VALIDATED_2026",
+  "remediation_command": "sudo mount -o remount,rw / && sudo chown -R $USER:$USER /tmp"
+}
