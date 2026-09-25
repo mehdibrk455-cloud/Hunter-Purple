@@ -98,8 +98,8 @@ To install Hunter globally on any Ubuntu or Debian-based machine:
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/your-username/Hunter.git
-cd Hunter
+git clone https://github.com/mehdibrk455-cloud/Hunter-Purple.git
+cd Hunter-Purple
 
 # 2. Run automated installer with root privileges
 sudo bash install.sh
