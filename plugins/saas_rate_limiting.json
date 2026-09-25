@@ -1,0 +1,8 @@
+{
+  "id": "WEB-RL-01",
+  "test_name": "Contrôle Limitation de Débit API (Rate Limiting)",
+  "category": "web_api",
+  "target_url": "https://onrender.com",
+  "expected_status_code": 429,
+  "remediation_command": "Ouvrir le code source du SaaS et injecter le middleware express-rate-limit"
+}

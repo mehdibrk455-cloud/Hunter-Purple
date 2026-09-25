@@ -2327,9 +2327,10 @@ async fn executer_plugins_engine(dir_arg: Option<&str>, fr: bool) {
     };
 
     for test in &plugin_tests {
-        let res = match test.category.as_str() {
-            "http_status" => plugins::execute_http_test(&client, test, fr).await,
-            _ => plugins::execute_io_test(test, fr),
+        let res = if test.target_url.is_some() || test.category == "http_status" || test.category == "web_api" || test.category == "http" {
+            plugins::execute_http_test(&client, test, fr).await
+        } else {
+            plugins::execute_io_test(test, fr)
         };
         results.push(res);
     }
