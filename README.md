@@ -26,11 +26,13 @@
 
 ## 🌟 Key Features
 
+- **🧩 Dynamic Data-Driven Plugins Engine**: Drop arbitrary JSON test definitions into `plugins/` to execute real system diagnostic checks dynamically at runtime without recompiling the binary.
+- **⚡ Behavioral I/O & Filesystem Diagnostic**: Validates live filesystem operations through multi-step synchronous writes, explicit `std::path::Path::exists` validation, payload read-back verification, and latency measurement to detect I/O interception or disk corruption.
 - **🌐 OWASP Top 10 Automated Probe Engine**: Sequentially evaluates 10 web attack surfaces (Broken Access Control, Cryptographic Failures, Injection Resilience, Rate Limiting, Security Misconfigurations, Outdated Components, Auth Failures, Software/Data Integrity, Logging & Monitoring, SSRF).
 - **🛡️ 14 Native Host & AV/EDR Posture Checks**: Inspects real-time antivirus engines, benign EICAR on-access quarantining, anti-ransomware Controlled Folder Access, AMSI registration, LSASS memory protection (RunAsPPL), Network Protection against C2 callback domains, script block logging (EID 4104), and host firewall profiles.
 - **⚡ Interactive Remediation Playbooks**: When a security control fails, Hunter immediately proposes the official system countermeasure. Upon user confirmation (`y`), Hunter deploys the defensive shield and **automatically verifies** that the endpoint is now protected (`[✓] CONFIRMED`).
 - **🌍 Native Bilingual Support**: Default professional English with comprehensive French localization triggered on-demand via `-fr` or `--fr`.
-- **🎨 Card-Based Visual Reporting**: High-contrast, boxed terminal cards with ANSI color highlights (`[SECURE]`, `[WARNING]`, `[NON-COMPLIANT]`, `[ERROR]`), automatic text-wrapping, and zero formatting bleed.
+- **🎨 Card-Based Visual Reporting**: High-contrast, boxed terminal cards with ANSI color highlights (`[PASS / SUCCESS]`, `[FAIL / ERROR]`, `[SECURE]`, `[WARNING]`), automatic text-wrapping, and zero formatting bleed.
 
 ---
 
@@ -130,9 +132,30 @@ cargo build --release
 .\target\release\Hunter.exe --auto-defend help -fr
 ```
 
----
-
 ## 💻 Command Reference & Usage
+
+### 0. Dynamic Data-Driven Testing Engine (Plugins)
+Scans the local `plugins/` folder (or a custom path) for `.json` test descriptors and executes them dynamically without recompilation:
+
+```bash
+# English (Default)
+hunter --plugins plugins/
+
+# French localization
+hunter --plugins plugins/ -fr
+```
+
+#### Plugin JSON Schema Example (`plugins/io_filesystem_integrity.json`):
+```json
+{
+  "id": "IO-01",
+  "test_name": "Diagnostic Intégrité I/O Système de Fichiers",
+  "category": "io_file",
+  "test_path": "/tmp/hunter_io_test.tmp",
+  "test_payload": "HUNTER_DIAGNOSTIC_PAYLOAD_VALIDATED_2026",
+  "remediation_command": "sudo mount -o remount,rw / && sudo chown -R $USER:$USER /tmp"
+}
+```
 
 ### 1. View the Detailed Scenarios Catalog & Help
 Displays boxed visual cards describing every available scenario, what it concretely tests, and what defensive shield Hunter deploys.
