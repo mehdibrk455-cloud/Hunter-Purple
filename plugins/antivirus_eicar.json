@@ -1,0 +1,8 @@
+{
+  "id": "IO-AV-01",
+  "test_name": "Contrôle Comportemental Antivirus (EICAR)",
+  "category": "io_file",
+  "test_path": "/tmp/test_virus.com",
+  "test_payload": "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*",
+  "remediation_command": "sudo apt-get install -y clamav clamav-daemon && sudo systemctl start clamav-daemon"
+}
